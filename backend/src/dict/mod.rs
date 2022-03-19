@@ -124,15 +124,28 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
                 let cur_ch = cur_trial[pos] - 1;
                 let cur_chresp = &cur_resp[pos];
 
-                chcnt[usize::from(cur_ch)] += 1;
+                match cur_chresp {
+                    WordleResp::Green => {
+                        chcnt[usize::from(cur_ch)] += 1;
+                        match_chars[pos] = cur_ch + 1;
+                    },
+                    WordleResp::Yellow => chcnt[usize::from(cur_ch)] += 1,
+                    _ => ()
+                }
+            }
+
+            for pos in 0..cur_trial.len() {
+                let cur_ch = cur_trial[pos] - 1;
+                let cur_chresp = &cur_resp[pos];
                 let cur_chcnt = &chcnt[usize::from(cur_ch)];
 
                 match cur_chresp {
                     WordleResp::Black => {
-                        cnt_constraint[usize::from(cur_ch)] = CharConstraint::ShouldNotContain;
+                        if *cur_chcnt == 0 {
+                            cnt_constraint[usize::from(cur_ch)] = CharConstraint::ShouldNotContain;
+                        }
                     }
                     WordleResp::Green => {
-                        match_chars[pos] = cur_ch;
                         match cnt_constraint[usize::from(cur_ch)] {
                             CharConstraint::ShouldContainAtLeast(cnt)=>
                                 cnt_constraint[usize::from(cur_ch)] = CharConstraint::ShouldContainAtLeast(max(cnt, *cur_chcnt)),
@@ -178,7 +191,7 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
 
         for pos in 0..usize::from(self.wordlen) {
             let expected_char = self.match_chars[pos];
-            if expected_char != 0 && expected_char != (word[pos] - 1) {
+            if expected_char != 0 && expected_char != word[pos] {
                 return false;
             }
             if self.prohib_chars[pos][usize::from(word[pos] - 1)] {
@@ -187,7 +200,7 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
         }
 
         let mut chcnt: [u16; CNTALPHA] = [0; CNTALPHA];
-        for ch in word {
+        for ch in word.iter() {
             chcnt[usize::from(*ch) - 1] += 1;
         }
 
@@ -215,7 +228,7 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
         }
 
         let mut chcnt: [u16; CNTALPHA] = [0; CNTALPHA];
-        for ch in word {
+        for ch in word.iter() {
             chcnt[usize::from(*ch) - 1] += 1;
         }
 

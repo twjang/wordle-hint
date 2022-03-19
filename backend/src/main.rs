@@ -8,6 +8,7 @@ use dict::{WordFilter, get_dict_service};
 use rocket::routes;
 use serde::{Serialize, Deserialize};
 use rocket_contrib::json::{Json};
+use rocket_contrib::serve::StaticFiles;
 use serde_derive::Deserialize;
 
 #[get("/")]
@@ -132,6 +133,8 @@ fn suggest(lang: &String, wordlen:usize, trial:&Vec<String>, resp:&Vec<String>, 
                         res_exploit.push((*cur_score, char_mapper.unmap_word(cur_word)))
                     }
 
+                    // print!("{:#?}", word_filter);
+
                 },
                 Err(e) => {
                     return Err(e)
@@ -150,5 +153,8 @@ fn main() {
         let mut svc = get_dict_service().write().unwrap();
         svc.load(&"en".to_string(), "./dict/en.txt".to_string(), &"en".to_string()).unwrap();
     }
-    rocket::ignite().mount("/", routes![index, pred]).launch();
+    rocket::ignite()
+    .mount("/", StaticFiles::from("./static"))
+    .mount("/api/", routes![index, pred])
+    .launch();
 }

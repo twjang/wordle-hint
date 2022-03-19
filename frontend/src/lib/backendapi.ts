@@ -12,7 +12,7 @@ export type RespSuggestion = {
 
 export async function getSuggestion(wordlen: number, dict:string, guess:string[], statuses:CharStatus[][], k:number): Promise<RespSuggestion> {
   const resp = await fetch(
-    `/pred`,
+    `/api/pred`,
     {
       method: 'POST',
       headers: {

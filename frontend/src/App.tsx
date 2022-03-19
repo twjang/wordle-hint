@@ -64,7 +64,7 @@ function App() {
   )
 
   const [queryLastUpdatedAt, setQueryLastUpdatedAt] = useState<number>(new Date().getTime());
-  const [suggestionNeedUpdate, setSuggestionNeedUpdate] = useState<boolean>(false);
+  const [suggestionNeedUpdate, setSuggestionNeedUpdate] = useState<boolean>(true);
   const [suggestionIsLoading, setSuggestionIsLoading] = useState<boolean>(false);
   const [suggestionError, setSuggestionError] = useState<string>('');
   const [toExploitList, setToExploitList] = useState<[number, string][]>([]);
@@ -111,7 +111,7 @@ function App() {
         })
       }
     }
-  }, 500);
+  }, 200);
 
   const handleDarkMode = (isDark: boolean) => {
     setIsDarkMode(isDark)
