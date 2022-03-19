@@ -145,6 +145,13 @@ function App() {
     requestNewSuggestion();
   }
 
+  const handleSuggestionClick = (value: string) => {
+    setStatuses([...statuses, Array(maxWordLength).fill('absent')])
+    setGuesses([...guesses, value.toUpperCase()])
+    requestNewSuggestion();
+
+    setCurrentGuess('')
+  }
 
   const onChar = (value: string) => {
     if (
@@ -215,8 +222,8 @@ function App() {
           (suggestionError !== '')?
           (<div className="flex grow text-center">{suggestionError}</div>):
           (<div className="flex flex-row place-content-center shrink overflow-x-hidden overflow-y-auto h-10 grow mb-5">
-            <SuggestionList title={"To solve"} wordList={toExploitList} />
-            <SuggestionList title={"To reduce"} wordList={toExploreList} />
+            <SuggestionList title={"To solve"} wordList={toExploitList} handleClick={handleSuggestionClick} />
+            <SuggestionList title={"To reduce"} wordList={toExploreList}  handleClick={handleSuggestionClick} />
           </div>)}
         <div className='shrink-0'>
           <Keyboard

@@ -64,7 +64,8 @@ pub struct EnglishCharMapper {}
 #[derive(Debug, Clone, Copy)]
 pub enum CharConstraint {
     ShouldNotContain,
-    ShouldContainAtLeast(u8)
+    ShouldContainAtLeast(u8),
+    ShouldContainExactly(u8)
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -143,6 +144,8 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
                     WordleResp::Black => {
                         if *cur_chcnt == 0 {
                             cnt_constraint[usize::from(cur_ch)] = CharConstraint::ShouldNotContain;
+                        } else {
+                            cnt_constraint[usize::from(cur_ch)] = CharConstraint::ShouldContainExactly(*cur_chcnt);
                         }
                     }
                     WordleResp::Green => {
@@ -216,6 +219,11 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
                         return false;
                     }
                 }
+                CharConstraint::ShouldContainExactly(mincnt) => {
+                    if chcnt[ch] != u16::from(mincnt) {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -244,6 +252,7 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
                         return false;
                     }
                 }
+                _=>{}
             }
         }
 
@@ -256,7 +265,8 @@ impl<const CNTALPHA: usize> WordFilter <CNTALPHA> {
         for (eidx, e) in self.cnt_constraint.iter().enumerate() {
             match *e {
                 CharConstraint::ShouldNotContain => res[eidx] = true,
-                CharConstraint::ShouldContainAtLeast(cnt) => res[eidx] = cnt != 0
+                CharConstraint::ShouldContainAtLeast(cnt) => res[eidx] = cnt != 0,
+                CharConstraint::ShouldContainExactly(_cnt) => res[eidx] = true
             }
         }
 

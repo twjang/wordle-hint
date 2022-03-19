@@ -2,12 +2,14 @@ type Props = {
   wordList: [number, string][]
   tagClassName?: string
   title?:string
+  handleClick?:Function
 }
 
 export const SuggestionList = ({
   wordList,
   tagClassName,
-  title
+  title,
+  handleClick
 }: Props) => {
   return (
     <div className="flex-col ">
@@ -15,7 +17,8 @@ export const SuggestionList = ({
       {wordList.map((scoreAndWord)=>{
         let [score, word] = scoreAndWord;
         return (
-        <div className={`mb-2 ml-4 text-xs flex flex-row items-center font-bold leading-sm uppercase px-3 py-1 rounded-full ${(tagClassName)?tagClassName:" bg-green-200 text-green-700"}`}>
+        <div className={`shadow-md mb-2 ml-4 text-xs flex flex-row items-center font-bold leading-sm uppercase px-3 py-1 rounded-full ${(tagClassName)?tagClassName:" bg-green-200 text-green-700"}`}
+          onClick={()=>{if (handleClick) handleClick(word);}}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
