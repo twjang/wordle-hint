@@ -3,21 +3,23 @@
 # ------------------------------------------------------------------------------
 
 FROM rust:latest as backend-env
-RUN apt-get update && apt-get install musl-tools -y && rustup target add x86_64-unknown-linux-musl
+RUN rustup toolchain install nightly
+RUN rustup default nightly
 
 WORKDIR /app/backend
-COPY Cargo.toml Cargo.toml
+COPY ./backend/Cargo.toml Cargo.toml
 
 RUN mkdir src/
 RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
+RUN cargo build --release
+RUN rm -f target/release/wordle*
 
 FROM backend-env as backend-build
-COPY ./backend/* ./
+COPY ./backend/src /app/backend/src
+COPY ./backend/dict /app/backend/dict
 
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-RUN find /app/backend/
+RUN touch ./src/main.rs && cargo build --release
+RUN ls /app/backend/target/release/
 
 # ------------------------------------------------------------------------------
 # Frontend 
@@ -29,7 +31,7 @@ COPY ./frontend/package-lock.json ./frontend/package.json ./
 RUN npm install
 
 FROM frontend-env AS frontend-build
-COPY ./frontend/* .
+COPY ./frontend/ /app/frontend/
 RUN npm run build
 
 
@@ -37,11 +39,12 @@ RUN npm run build
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM alpine:latest
+FROM debian:buster-slim
 
 WORKDIR /app/
-COPY --from=backend-build /usr/local/cargo/bin/myapp /app/wordle-hint-backend
+COPY ./backend/dict/ /app/dict/
+COPY --from=backend-build /app/backend/target/release/wordle-solve-backend /app/wordle-hint-backend
 COPY --from=frontend-build /app/frontend/build /app/static
 
 EXPOSE 8080
-CMD ["myapp"]
+CMD ["/app/wordle-hint-backend"]
